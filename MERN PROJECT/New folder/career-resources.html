@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Career Resources</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><span class="logo-icon">✓</span><span>JobTrack</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html" class="active-link">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+                <a href="login.html" data-auth-link="login">Login</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-header card padded">
+            <div>
+                <p class="eyebrow">CAREER RESOURCES</p>
+                <h1>Build your next advantage.</h1>
+            </div>
+        </section>
+
+        <section class="card padded">
+            <div class="filter-row">
+                <input id="resourceSearch" type="search" placeholder="Search resources...">
+                <select id="resourceCategory">
+                    <option value="All">All</option>
+                    <option value="Resume">Resume</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Career Planning">Career Planning</option>
+                    <option value="Technical Skills">Technical Skills</option>
+                    <option value="Soft Skills">Soft Skills</option>
+                    <option value="Job Search">Job Search</option>
+                    <option value="Networking">Networking</option>
+                </select>
+            </div>
+            <div id="resourcesGrid" class="module-grid"></div>
+        </section>
+    </main>
+
+    <div id="resourceModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="resourceModalTitle">
+        <div class="modal-card resource-detail-card">
+            <button type="button" class="close-button" id="closeResourceModal" aria-label="Close resource">×</button>
+            <p class="eyebrow" id="resourceModalCategory"></p>
+            <h2 id="resourceModalTitle"></h2>
+            <p id="resourceModalContent"></p>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: true });
+
+        const searchInput = document.getElementById('resourceSearch');
+        const categorySelect = document.getElementById('resourceCategory');
+        const resourcesGrid = document.getElementById('resourcesGrid');
+
+        async function loadResources() {
+            try {
+                const params = new URLSearchParams({
+                    q: searchInput.value.trim(),
+                    category: categorySelect.value
+                });
+
+                const result = await window.jobtrackApi.get(`/api/resources?${params.toString()}`);
+                const resources = result.resources || [];
+
+                if (!resources.length) {
+                    resourcesGrid.innerHTML = '<div class="empty-state">No resources match your search.</div>';
+                    return;
+                }
+
+                resourcesGrid.innerHTML = resources.map((resource) => `
+                    <article class="feature-panel">
+                        <span class="module-icon">${(resource.category || 'RB').slice(0,2).toUpperCase()}</span>
+                        <h2>${resource.title}</h2>
+                        <p>${resource.summary}</p>
+                        <small>${resource.category}</small>
+                        <div class="job-card-actions">
+                            <button class="secondary-button" type="button" data-open-resource="${resource.id}">Open</button>
+                            <button class="secondary-button" type="button" data-resource-id="${resource.id}" data-bookmarked="${resource.bookmarked ? 'true' : 'false'}">${resource.bookmarked ? 'Saved' : 'Save'}</button>
+                        </div>
+                    </article>
+                `).join('');
+
+                document.querySelectorAll('[data-resource-id]').forEach((button) => {
+                    button.addEventListener('click', async () => {
+                        const bookmarked = button.dataset.bookmarked === 'true';
+                        try {
+                            await window.jobtrackApi.put(`/api/resources/${button.dataset.resourceId}/bookmark`, { bookmarked: !bookmarked });
+                            await loadResources();
+                        } catch (error) {
+                            alert(error.message);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('[data-open-resource]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const resource = resources.find((item) => String(item.id) === String(button.dataset.openResource));
+                        if (!resource) return;
+                        document.getElementById('resourceModalCategory').textContent = resource.category;
+                        document.getElementById('resourceModalTitle').textContent = resource.title;
+                        document.getElementById('resourceModalContent').textContent = resource.content;
+                        document.getElementById('resourceModal').classList.remove('hidden');
+                    });
+                });
+            } catch (error) {
+                resourcesGrid.innerHTML = '<div class="empty-state">Unable to load resources right now.</div>';
+            }
+        }
+
+        searchInput.addEventListener('input', loadResources);
+        categorySelect.addEventListener('change', loadResources);
+        document.getElementById('closeResourceModal').addEventListener('click', () => document.getElementById('resourceModal').classList.add('hidden'));
+        document.getElementById('resourceModal').addEventListener('click', (event) => {
+            if (event.target.id === 'resourceModal') event.currentTarget.classList.add('hidden');
+        });
+        loadResources();
+    </script>
+</body>
+</html>

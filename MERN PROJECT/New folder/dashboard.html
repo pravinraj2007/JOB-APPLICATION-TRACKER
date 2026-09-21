@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <header class="dashboard-header">
+        <a class="brand" href="/">JobTrack</a>
+        <div class="header-actions">
+            <span id="userName"></span>
+            <button class="outline-button" id="logoutButton" type="button">Log out</button>
+        </div>
+    </header>
+
+    <main class="dashboard-layout">
+        <aside class="sidebar">
+            <p class="eyebrow">YOUR WORKSPACE</p>
+            <nav class="module-nav" aria-label="Dashboard modules">
+                <button class="module-link active" data-section="jobs" type="button">Job Applications</button>
+                <button class="module-link" data-section="resume" type="button">Resume AI</button>
+                <button class="module-link" data-section="resources" type="button">Career Resources</button>
+                <a class="module-link module-link-anchor" href="/interview-prep">Interview Prep</a>
+            </nav>
+        </aside>
+
+        <div class="dashboard-content">
+            <section class="dashboard-section active" id="jobs">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">JOB APPLICATION MODULE</p>
+                        <h1>Keep every opportunity moving.</h1>
+                    </div>
+                    <button class="primary-button" id="addJobButton" type="button">+ Add job</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card"><span>Total jobs</span><strong id="totalJobs">0</strong></div>
+                    <div class="stat-card"><span>Saved</span><strong id="savedJobs">0</strong></div>
+                    <div class="stat-card"><span>Applied</span><strong id="appliedJobs">0</strong></div>
+                    <div class="stat-card"><span>Interviews</span><strong id="interviewJobs">0</strong></div>
+                    <div class="stat-card"><span>Offers</span><strong id="offerJobs">0</strong></div>
+                    <div class="stat-card"><span>Rejected</span><strong id="rejectedJobs">0</strong></div>
+                </div>
+
+                <div class="dashboard-insights">
+                    <div class="panel"><div class="panel-heading"><h2>Upcoming deadlines</h2></div><div id="deadlinesList" class="deadline-list"><p>Loading deadlines...</p></div></div>
+                    <div class="panel"><div class="panel-heading"><h2>Resume status</h2></div><p id="resumeStatus">Checking resume status...</p><a class="secondary-button" href="/resume-ai">Open Resume AI</a></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h2>Job tracker</h2>
+                        <span id="jobsMessage"></span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Company</th><th>Role</th><th>Status</th><th>Date</th><th></th></tr></thead>
+                            <tbody id="jobsTable"><tr><td colspan="5">Loading jobs...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel dashboard-notifications">
+                    <div class="panel-heading">
+                        <h2>Notifications</h2>
+                        <button class="secondary-button" id="markNotificationsRead" type="button">Mark all read</button>
+                    </div>
+                    <div id="notificationsList" class="notification-list"><p>Loading notifications...</p></div>
+                </div>
+            </section>
+
+            <section class="dashboard-section" id="resume">
+                <p class="eyebrow">RESUME AI MODULE</p>
+                <h1>Build a stronger application.</h1>
+                <div class="module-grid">
+                    <article class="feature-panel"><span class="module-icon">RB</span><h2>Resume Builder</h2><p>Create a focused resume for each role using your saved job details.</p><button class="secondary-button tool-button" data-tool="builder" type="button">Open builder</button></article>
+                    <article class="feature-panel"><span class="module-icon">ATS</span><h2>ATS Checker</h2><p>Review keywords and structure before sending your application.</p><button class="secondary-button tool-button" data-tool="ats" type="button">Check a resume</button></article>
+                    <article class="feature-panel"><span class="module-icon">AI</span><h2>Skills Check</h2><p>Compare your current skills with the requirements in your target roles.</p><button class="secondary-button tool-button" data-tool="skills" type="button">Review skills</button></article>
+                </div>
+            </section>
+
+            <section class="dashboard-section" id="resources">
+                <p class="eyebrow">CAREER RESOURCES MODULE</p>
+                <h1>Prepare for the next conversation.</h1>
+                <div class="module-grid">
+                    <article class="feature-panel"><span class="module-icon">IQ</span><h2>Interview Questions</h2><p>Practice questions with role, level, and interview-type guidance.</p><a class="secondary-button" href="/interview-prep">Start practice</a></article>
+                    <article class="feature-panel"><span class="module-icon">TP</span><h2>Technical Prep</h2><p>Build a focused preparation plan around the role you want.</p><button class="secondary-button tool-button" data-tool="technical" type="button">View practice</button></article>
+                    <article class="feature-panel"><span class="module-icon">CG</span><h2>Career Guidance</h2><p>Use practical guidance to keep your search moving forward.</p><button class="secondary-button tool-button" data-tool="guidance" type="button">Explore guidance</button></article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="job-modal" id="jobModal" hidden>
+        <form class="job-form" id="jobForm">
+            <button class="close-button" id="closeJobButton" type="button" aria-label="Close">x</button>
+            <p class="eyebrow">NEW APPLICATION</p>
+            <h2>Add a job</h2>
+            <label>Company<input name="company" required></label>
+            <label>Role<input name="role" required></label>
+            <label>Status<select name="status"><option>Saved</option><option selected>Applied</option><option>Assessment</option><option>Interview</option><option>Offer</option><option>Rejected</option><option>Withdrawn</option></select></label>
+            <label>Job link<input name="job_link" type="url"></label>
+            <label>Application date<input name="application_date" type="date"></label>
+            <label>Notes<textarea name="notes" rows="3"></textarea></label>
+            <button class="primary-button" type="submit">Save job</button>
+            <p id="jobFormMessage"></p>
+        </form>
+    </div>
+
+    <div class="tool-modal" id="toolModal" hidden>
+        <section class="tool-panel" role="dialog" aria-modal="true" aria-labelledby="toolTitle">
+            <button class="close-button" id="closeToolButton" type="button" aria-label="Close">x</button>
+            <p class="eyebrow" id="toolEyebrow"></p>
+            <h2 id="toolTitle"></h2>
+            <div id="toolContent"></div>
+        </section>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

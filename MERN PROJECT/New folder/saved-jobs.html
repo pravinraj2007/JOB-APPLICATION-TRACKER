@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Saved Jobs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><span class="logo-icon">✓</span><span>JobTrack</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="saved-jobs.html" class="active-link">Saved Jobs</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-header card">
+            <div>
+                <p class="eyebrow">SAVED JOBS</p>
+                <h1>Your bookmarked opportunities.</h1>
+            </div>
+        </section>
+        <section id="savedJobsList" class="card padded"></section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        window.jobtrackAuth.requireAuth();
+        const list = document.getElementById('savedJobsList');
+        function readJobs() { try { return JSON.parse(localStorage.getItem('jobtrackJobs') || '[]'); } catch (error) { return []; } }
+        const jobs = readJobs().filter((job) => job.bookmarked);
+        list.innerHTML = jobs.length ? jobs.map((job) => `
+            <article class="job-card">
+                <div class="job-card-head">
+                    <strong>${job.company}</strong>
+                    <span class="status ${job.status.toLowerCase().replace(/\s+/g, '-')}">${job.status}</span>
+                </div>
+                <p>${job.role}</p>
+                <small>${job.location || 'Remote'} • ${job.date || 'Date not set'}</small>
+                <div class="job-card-actions">
+                    <a class="mini-button" href="job-tracker.html">Open</a>
+                    <button class="mini-button" type="button">Apply</button>
+                    <button class="mini-button danger" type="button">Remove Bookmark</button>
+                </div>
+            </article>
+        `).join('') : '<div class="empty-state">No saved jobs yet.</div>';
+    </script>
+</body>
+</html>
