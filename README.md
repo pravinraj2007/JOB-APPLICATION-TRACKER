@@ -1,73 +1,212 @@
-# JobTrack
+# 💼 JobTrack — Job Application & Career Management Platform
 
-JobTrack is a complete job search and career management platform built with React, Vite, Express, and a demo-first architecture. It works without external AI keys or MongoDB and includes a ready-to-use demo mode for local development.
+<p align="center">
+  <strong>Track. Improve. Prepare. Get Hired.</strong>
+</p>
 
-## Features
+<p align="center">
+  A modern full-stack career management platform designed to help job seekers organize applications, analyze resumes, improve skills, prepare for interviews, and monitor their career progress — all from one dashboard.
+</p>
 
-- Landing page with marketing sections and responsive layout
-- Login and signup flows with demo authentication
-- Protected dashboard with application stats and charts
-- Job tracker with add, edit, delete, and status kanban workflow
-- Saved jobs and bookmarks pages
-- Resume builder with live preview
-- ATS checker with scoring and suggestions
-- AI enhancement module with local enhancement logic
-- Skills check and interview prep modules
-- Career guidance and profile/settings pages
-- Direct route support for front-end navigation
+---
 
-## Tech stack
+## 🌟 Overview
 
-- Frontend: React + Vite + React Router + Recharts + Lucide React
-- Backend: Node.js + Express
-- Auth: demo JWT-style flows with local storage session handling
-- Demo mode: works without MongoDB or AI API
+**JobTrack** is a full-stack job application tracking and career management platform built with the MERN ecosystem.
 
-## Project structure
+Instead of using spreadsheets, notes, bookmarks, and multiple tools to manage a job search, JobTrack brings everything into one centralized platform.
 
-- `client/` – React frontend
-- `server/` – Express backend demo API
-- `.env.example` – environment example values
+From tracking applications to checking ATS compatibility and preparing for interviews, JobTrack provides a complete workspace for managing the job-search journey.
 
-## Installation
+---
 
-1. Install dependencies:
+## ✨ Key Features
 
-```bash
-cd "c:\Users\aniru\Downloads\MERN PROJECT\New folder"
-npm install
-```
+### 📊 Career Dashboard
 
-2. Copy environment values:
+Get a complete overview of your job search activity.
 
-```bash
-copy .env.example .env
-```
+- Total applications
+- Active applications
+- Interviews
+- Job offers
+- Saved jobs
+- Resume ATS score
+- Recommended jobs
+- Skill match percentage
+- Application analytics
+- Upcoming deadlines
+- Career roadmap
+- Interview progress
+- Profile completion
+- Career readiness
 
-3. Start the app:
+---
 
-```bash
-npm run dev
-```
+### 💼 Job Application Tracker
 
-This starts the Express API on port 5001 and the Vite app on port 5173.
+Manage your entire application pipeline from one place.
 
-## Environment variables
+- Add new job applications
+- Edit application details
+- Delete applications
+- Track application status
+- Organize applications through a workflow
+- Monitor application progress
+- Keep important job information centralized
 
-Example values are in `.env.example`:
+---
 
-- `PORT=5001`
-- `CLIENT_URL=http://localhost:5173`
-- `MONGODB_URI=`
-- `JWT_SECRET=jobtrack-demo-secret`
+### 🔖 Saved Jobs
 
-## Demo credentials
+Save interesting opportunities and access them later.
 
-- Email: `demo@jobtrack.app`
-- Password: `demo123`
+- Bookmark jobs
+- Maintain a personal job shortlist
+- Quickly access saved opportunities
 
-## Troubleshooting
+---
 
-- If the frontend route does not load on refresh, make sure the Vite dev server is running and you are opening the app through the client port.
-- If you want to use the backend API without the frontend, run `npm run dev:server`.
-- If you need to build for production, run `npm run build`.
+### 📄 Resume Builder
+
+Create and manage a professional resume.
+
+- Resume creation
+- Live preview
+- Structured resume sections
+- Easy editing
+- Resume management
+
+---
+
+### 🎯 ATS Resume Checker
+
+Analyze your resume for Applicant Tracking System compatibility.
+
+- ATS score
+- Resume analysis
+- Improvement suggestions
+- Skill matching
+- Resume optimization guidance
+
+---
+
+### 🤖 AI Enhancement
+
+Improve career-related content using intelligent enhancement features.
+
+- Content improvement
+- Resume enhancement
+- Career-focused suggestions
+- Local/demo enhancement logic
+
+> The current version includes demo-first AI functionality and does not require an external AI API key.
+
+---
+
+### 🧠 Skills & Skill Gap Analysis
+
+Understand your current skills and identify areas for improvement.
+
+- Skill analysis
+- Skill matching
+- Skill gap identification
+- Career improvement guidance
+
+---
+
+### 🎤 Interview Preparation
+
+Prepare for interviews with dedicated interview preparation features.
+
+- Interview preparation
+- Progress tracking
+- Career guidance
+- Interview-focused resources
+
+---
+
+### 📈 Job Comparison
+
+Compare different job opportunities to help organize your decision-making.
+
+---
+
+### 🔔 Job Alerts
+
+Keep track of important job-related notifications and opportunities.
+
+---
+
+### ✉️ Career Tools
+
+JobTrack also includes additional career productivity tools:
+
+- Cover Letter Generator
+- Email Generator
+- Resume Match
+- ATS Tools
+- Career Roadmap
+- Recommendations
+- Profile & Settings
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+
+- React.js
+- Vite
+- React Router
+- Recharts
+- Lucide React
+- JavaScript
+- HTML5
+- CSS3
+
+## Backend
+
+- Node.js
+- Express.js
+
+## Authentication
+
+- JWT-style authentication flow
+- Local storage based session handling
+- Demo authentication
+
+## Development
+
+- npm
+- Git
+- GitHub
+- VS Code
+
+---
+
+# 🏗️ Architecture
+
+```text
+                    ┌─────────────────────┐
+                    │      JobTrack       │
+                    │   Career Platform   │
+                    └──────────┬──────────┘
+                               │
+                 ┌─────────────┴─────────────┐
+                 │                           │
+        ┌────────▼────────┐        ┌────────▼────────┐
+        │ React Frontend  │        │ Express Backend │
+        │     + Vite      │◄──────►│    Node.js      │
+        └────────┬────────┘        └────────┬────────┘
+                 │                           │
+        ┌────────▼────────┐        ┌────────▼────────┐
+        │ Career Modules  │        │   API Services  │
+        │                 │        │                 │
+        │ • Dashboard     │        │ • Authentication│
+        │ • Jobs          │        │ • Applications  │
+        │ • Resume        │        │ • Job Data      │
+        │ • ATS           │        │ • User Data     │
+        │ • Skills        │        │                 │
+        │ • Interview     │        │                 │
+        └─────────────────┘        └─────────────────┘
