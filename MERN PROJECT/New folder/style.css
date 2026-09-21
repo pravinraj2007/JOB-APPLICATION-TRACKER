@@ -2312,3 +2312,99 @@ body.page-body {
     .settings-grid { grid-template-columns: 1fr; }
     .nav-links a.active-link::after { display: none; }
 }
+
+/* =========================================
+   INTERACTIVE MOTION
+========================================= */
+
+.card,
+.btn,
+button,
+a.nav-link {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.2s ease,
+                background 0.3s ease;
+    will-change: transform;
+}
+
+.card:hover,
+.btn:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.15);
+}
+
+.card:active,
+.btn:active {
+    transform: translateY(1px) rotate(-0.8deg) scale(0.98);
+    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   NAVIGATION SHIMMER
+========================================= */
+
+.nav-link,
+.nav-links a:not(.nav-button) {
+    position: relative;
+    color: #374151;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 12px;
+    background-clip: text;
+    -webkit-background-clip: text;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-links a:not(.nav-button):hover {
+    color: transparent;
+    background-image: linear-gradient(
+        120deg,
+        #6366f1 0%,
+        #a855f7 25%,
+        #ec4899 50%,
+        #3b82f6 75%,
+        #6366f1 100%
+    );
+    background-size: 200% auto;
+    animation: shimmer 2s linear infinite;
+    text-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+
+.nav-link::after,
+.nav-links a:not(.nav-button)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #ec4899);
+    border-radius: 2px;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-links a:not(.nav-button):hover::after {
+    width: 80%;
+    left: 10%;
+}
+
+.nav-links a.active-link::after {
+    right: 0;
+    bottom: -28px;
+    left: 0;
+    width: auto;
+    height: 2px;
+    background: var(--primary);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 0% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
