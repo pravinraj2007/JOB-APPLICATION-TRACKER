@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Settings</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><span class="logo-icon">✓</span><span>JobTrack</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="profile.html">Profile</a>
+                <a href="settings.html" class="active-link">Settings</a>
+                <a href="login.html" data-auth-link="login">Login</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-header card padded">
+            <div>
+                <p class="eyebrow">ACCOUNT SETTINGS</p>
+                <h1>Control your JobTrack account.</h1>
+            </div>
+        </section>
+
+        <section class="settings-grid">
+            <article class="feature-panel">
+                <p class="eyebrow">ACCOUNT</p><h2>Profile</h2>
+                <p id="settingsUser">Loading user info...</p>
+                <p id="settingsStatus">Checking profile completion...</p>
+                <a class="secondary-button" href="/profile">Edit profile</a>
+            </article>
+            <article class="feature-panel">
+                <p class="eyebrow">SECURITY</p><h2>Session security</h2>
+                <p>Your account uses a protected JWT session and server-side authentication.</p>
+                <button class="secondary-button" type="button" id="logoutSettings">Log out</button>
+            </article>
+            <article class="feature-panel settings-preferences">
+                <p class="eyebrow">NOTIFICATIONS</p><h2>Notification preferences</h2>
+                <label class="setting-toggle"><span>Application updates</span><input id="notificationsEnabled" type="checkbox"><span class="toggle-track"></span></label>
+                <label class="setting-toggle"><span>Weekly digest</span><input id="weeklyDigest" type="checkbox"><span class="toggle-track"></span></label>
+            </article>
+            <article class="feature-panel settings-preferences">
+                <p class="eyebrow">PREFERENCES</p><h2>Workspace</h2>
+                <label class="setting-toggle"><span>Compact dashboard view</span><input id="compactView" type="checkbox"><span class="toggle-track"></span></label>
+                <button class="primary-button" type="button" id="savePreferences">Save preferences</button>
+                <p id="preferencesMessage" class="tool-message"></p>
+            </article>
+            <article class="feature-panel">
+                <p class="eyebrow">AI INTEGRATIONS</p><h2>AI enhancement</h2>
+                <p id="aiStatus">Checking AI status...</p>
+                <button class="secondary-button" type="button" id="refreshSettings">Refresh</button>
+            </article>
+        </section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: true });
+
+        async function loadSettings() {
+            try {
+                const result = await window.jobtrackApi.get('/api/settings');
+                const user = result.user || {};
+                document.getElementById('settingsUser').textContent = `${user.name || 'User'} • ${user.email || 'No email available'}`;
+                document.getElementById('settingsStatus').textContent = result.profile && Object.keys(result.profile).length ? 'Profile is saved on the server.' : 'Profile is not fully set up yet.';
+                document.getElementById('aiStatus').textContent = result.aiEnabled ? 'AI enhancement is enabled and ready for backend use.' : 'AI enhancement is not configured yet. Add OPENAI_API_KEY to the server environment.';
+                const preferences = result.preferences || {};
+                document.getElementById('notificationsEnabled').checked = Boolean(preferences.notifications_enabled ?? result.notificationsEnabled);
+                document.getElementById('weeklyDigest').checked = Boolean(preferences.weekly_digest);
+                document.getElementById('compactView').checked = Boolean(preferences.compact_view);
+            } catch (error) {
+                document.getElementById('settingsStatus').textContent = error.message;
+                document.getElementById('aiStatus').textContent = 'Unable to load settings.';
+            }
+        }
+
+        document.getElementById('refreshSettings').addEventListener('click', loadSettings);
+        document.getElementById('logoutSettings').addEventListener('click', () => window.jobtrackAuth.logout());
+        document.getElementById('savePreferences').addEventListener('click', async () => {
+            const message = document.getElementById('preferencesMessage');
+            try {
+                const result = await window.jobtrackApi.put('/api/settings/preferences', {
+                    notificationsEnabled: document.getElementById('notificationsEnabled').checked,
+                    weeklyDigest: document.getElementById('weeklyDigest').checked,
+                    compactView: document.getElementById('compactView').checked
+                });
+                message.textContent = result.message || 'Preferences saved.';
+            } catch (error) { message.textContent = error.message; }
+        });
+        loadSettings();
+    </script>
+</body>
+</html>

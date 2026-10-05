@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">✓</span>
+                <span>JobTrack</span>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+                <a href="login.html" class="login-link" data-auth-link="login">Login</a>
+                <a href="signup.html" class="nav-button" data-auth-link="signup">Get Started</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="auth-shell">
+        <div class="auth-panel">
+            <span class="section-label">WELCOME BACK</span>
+            <h2>Login to JobTrack</h2>
+            <p id="authMessage">Continue organizing your job search.</p>
+
+            <form id="loginForm" class="auth-form">
+                <label>
+                    Email
+                    <input id="loginEmail" name="email" type="email" required autocomplete="email">
+                </label>
+                <label>
+                    Password
+                    <input id="loginPassword" name="password" type="password" required autocomplete="current-password">
+                </label>
+                <div class="auth-actions">
+                    <button class="cta-button" type="submit">Login</button>
+                </div>
+                <div class="auth-links-row">
+                    <button class="link-button" type="button" id="forgotPasswordButton">Forgot Password</button>
+                    <a href="signup.html" class="link-button">Create Account</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: false });
+
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('loginEmail');
+        const passwordInput = document.getElementById('loginPassword');
+        const authMessage = document.getElementById('authMessage');
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                authMessage.textContent = 'Please enter your email and password.';
+                authMessage.classList.add('error');
+                return;
+            }
+
+            if (!window.jobtrackAuth.isValidEmail(email)) {
+                authMessage.textContent = 'Please enter a valid email address.';
+                authMessage.classList.add('error');
+                return;
+            }
+
+            try {
+                const result = await window.jobtrackApi.post('/api/login', { email, password });
+                localStorage.setItem('jobtrackToken', result.token);
+                localStorage.setItem('jobtrackUser', JSON.stringify(result.user));
+                authMessage.textContent = 'Login successful.';
+                authMessage.classList.remove('error');
+                window.location.href = '/dashboard';
+            } catch (error) {
+                authMessage.textContent = error.message;
+                authMessage.classList.add('error');
+            }
+        });
+
+        document.getElementById('forgotPasswordButton').addEventListener('click', function () {
+            authMessage.textContent = 'Password reset is not connected yet. Please create a new account or contact support.';
+            authMessage.classList.add('error');
+        });
+    </script>
+</body>
+</html>

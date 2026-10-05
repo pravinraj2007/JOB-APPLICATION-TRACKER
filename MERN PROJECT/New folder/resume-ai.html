@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Resume AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-body resume-ai-page">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><span class="logo-icon">✓</span><span>JobTrack</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html" class="active-link">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+                <a href="login.html" data-auth-link="login">Login</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-header card padded resume-hero">
+            <div>
+                <p class="eyebrow">RESUME AI</p>
+                <h1>Polish your resume with intention.</h1>
+                <p class="page-lede">Build, analyze, and improve your resume with intelligent tools designed for your next opportunity.</p>
+            </div>
+            <div class="resume-hero-mark" aria-hidden="true"><span>AI</span><i></i><b></b></div>
+        </section>
+
+        <section class="resume-tool-grid" aria-label="Resume AI tools">
+            <article class="feature-panel resume-tool-card">
+                <div class="resume-tool-top"><span class="tool-index">01</span><span class="module-icon">✦</span></div>
+                <span class="tool-label">BUILD</span>
+                <h2>Resume Builder</h2>
+                <p>Create a polished resume aligned with the role you want.</p>
+                <button class="secondary-button tool-button" data-tool="builder" type="button">Open Builder <span aria-hidden="true">→</span></button>
+            </article>
+            <article class="feature-panel resume-tool-card">
+                <div class="resume-tool-top"><span class="tool-index">02</span><span class="module-icon">◎</span></div>
+                <span class="tool-label">ANALYZE</span>
+                <h2>ATS Checker</h2>
+                <p>Check keywords, formatting, and stronger positioning.</p>
+                <button class="secondary-button tool-button" data-tool="ats" type="button">Check Resume <span aria-hidden="true">→</span></button>
+            </article>
+            <article class="feature-panel resume-tool-card">
+                <div class="resume-tool-top"><span class="tool-index">03</span><span class="module-icon">✧</span></div>
+                <span class="tool-label">ENHANCE</span>
+                <h2>AI Enhancement</h2>
+                <p>Rewrite your summary, project text, and accomplishments.</p>
+                <button class="secondary-button tool-button" data-tool="enhance" type="button">Enhance Copy <span aria-hidden="true">→</span></button>
+            </article>
+            <article class="feature-panel resume-tool-card">
+                <div class="resume-tool-top"><span class="tool-index">04</span><span class="module-icon">◈</span></div>
+                <span class="tool-label">COMPARE</span>
+                <h2>Skills Check</h2>
+                <p>Compare your skills with the job requirements you care about.</p>
+                <button class="secondary-button tool-button" data-tool="skills" type="button">Review Skills <span aria-hidden="true">→</span></button>
+            </article>
+        </section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="resume-ai.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: true });
+    </script>
+</body>
+</html>

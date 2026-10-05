@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JobTrack | Profile</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><span class="logo-icon">✓</span><span>JobTrack</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="profile.html" class="active-link">Profile</a>
+                <a href="settings.html">Settings</a>
+                <a href="login.html" data-auth-link="login">Login</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-header card padded">
+            <div>
+                <p class="eyebrow">PROFILE</p>
+                <h1>Personalize your career profile.</h1>
+            </div>
+        </section>
+
+        <section class="card padded">
+            <form id="profileForm" class="resume-form">
+                <div class="form-grid">
+                    <label>Full Name<input name="fullName" type="text"></label>
+                    <label>Email<input name="email" type="email"></label>
+                    <label>Phone<input name="phone" type="tel"></label>
+                    <label>Location<input name="location" type="text"></label>
+                    <label>LinkedIn<input name="linkedin" type="url"></label>
+                    <label>GitHub<input name="github" type="url"></label>
+                    <label>Portfolio<input name="portfolio" type="url"></label>
+                    <label>Current Role<input name="currentRole" type="text"></label>
+                    <label>Target Role<input name="targetRole" type="text"></label>
+                    <label>Experience<input name="experience" type="text"></label>
+                    <label>Preferred Location<input name="preferredLocation" type="text"></label>
+                    <label>Work Mode<select name="workMode">
+                        <option value="">Select</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="On-site">On-site</option>
+                    </select></label>
+                    <label>Skills<textarea name="skills" rows="3"></textarea></label>
+                    <label>Education<textarea name="education" rows="4"></textarea></label>
+                </div>
+                <div class="tool-actions">
+                    <button class="primary-button" type="submit">Save Profile</button>
+                    <button class="secondary-button" type="button" id="cancelProfileButton">Cancel</button>
+                </div>
+                <p id="profileMessage"></p>
+            </form>
+        </section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: true });
+
+        const form = document.getElementById('profileForm');
+        const message = document.getElementById('profileMessage');
+
+        async function loadProfile() {
+            try {
+                const result = await window.jobtrackApi.get('/api/profile');
+                const profile = result.profile || {};
+                form.fullName.value = profile.full_name || '';
+                form.email.value = profile.email || '';
+                form.phone.value = profile.phone || '';
+                form.location.value = profile.location || '';
+                form.linkedin.value = profile.linkedin || '';
+                form.github.value = profile.github || '';
+                form.portfolio.value = profile.portfolio || '';
+                form.currentRole.value = profile.current_role || '';
+                form.targetRole.value = profile.target_role || '';
+                form.experience.value = profile.experience || '';
+                form.preferredLocation.value = profile.preferred_location || '';
+                form.workMode.value = profile.work_mode || '';
+                form.skills.value = profile.skills || '';
+                form.education.value = profile.education || '';
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const payload = Object.fromEntries(new FormData(form).entries());
+            message.textContent = 'Saving profile...';
+            try {
+                const result = await window.jobtrackApi.put ? window.jobtrackApi.put('/api/profile', payload) : window.jobtrackApi.post('/api/profile', payload);
+                message.textContent = result.message || 'Profile saved.';
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        });
+
+        document.getElementById('cancelProfileButton').addEventListener('click', () => loadProfile());
+        loadProfile();
+    </script>
+</body>
+</html>
