@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">✓</span>
+                <span>JobTrack</span>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="login.html" class="login-link" data-auth-link="login">Login</a>
+                <a href="signup.html" class="nav-button" data-auth-link="signup">Get Started</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="auth-shell">
+        <div class="auth-panel">
+            <span class="section-label">GET STARTED</span>
+            <h2>Create your JobTrack account</h2>
+            <p id="authMessage">Start organizing your job search today.</p>
+
+            <div class="auth-switcher">
+                <button class="auth-switch active" type="button">Sign up</button>
+                <a href="login.html" class="auth-switch alt">Login</a>
+            </div>
+
+            <form id="signupForm" class="auth-form">
+                <label>
+                    Full Name
+                    <input id="signupName" name="name" type="text" required autocomplete="name">
+                </label>
+                <label>
+                    Email
+                    <input id="signupEmail" name="email" type="email" required autocomplete="email">
+                </label>
+                <label>
+                    Password
+                    <span class="password-field"><input id="signupPassword" name="password" type="password" required autocomplete="new-password"><button type="button" class="password-toggle" data-target="signupPassword">Show</button></span>
+                    <span id="passwordStrength" class="password-strength" aria-live="polite">Use at least 6 characters.</span>
+                </label>
+                <label>
+                    Confirm Password
+                    <span class="password-field"><input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password"><button type="button" class="password-toggle" data-target="confirmPassword">Show</button></span>
+                </label>
+                <label id="verificationField" hidden>
+                    Verification Code
+                    <input id="verificationCode" name="verificationCode" inputmode="numeric" autocomplete="one-time-code">
+                </label>
+                <div class="auth-actions">
+                    <button class="cta-button" id="signupSubmit" type="submit">Create account</button>
+                </div>
+            </form>
+            <section id="verificationState" class="verification-state" hidden>
+                <strong>Check your email</strong>
+                <p>We've sent a verification code to <span id="verificationEmail"></span>.</p>
+                <button class="link-button" id="resendVerification" type="button">Resend verification email</button>
+                <a class="link-button" href="login.html">Back to Login</a>
+            </section>
+        </div>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: false });
+
+        const form = document.getElementById('signupForm');
+        const nameInput = document.getElementById('signupName');
+        const emailInput = document.getElementById('signupEmail');
+        const passwordInput = document.getElementById('signupPassword');
+        const confirmInput = document.getElementById('confirmPassword');
+        const authMessage = document.getElementById('authMessage');
+        const submitButton = document.getElementById('signupSubmit');
+        const verificationField = document.getElementById('verificationField');
+        const verificationCode = document.getElementById('verificationCode');
+        const verificationState = document.getElementById('verificationState');
+        const verificationEmail = document.getElementById('verificationEmail');
+        const resendButton = document.getElementById('resendVerification');
+        const passwordStrength = document.getElementById('passwordStrength');
+
+        let pendingVerificationEmail = '';
+
+        function showMessage(message, isError = false) {
+            authMessage.textContent = message;
+            authMessage.classList.toggle('error', isError);
+        }
+
+        function setSubmitting(isSubmitting, label) {
+            submitButton.disabled = isSubmitting;
+            submitButton.textContent = label;
+        }
+
+        function passwordScore(password) {
+            return [password.length >= 6, /[A-Z]/.test(password), /[a-z]/.test(password), /\d/.test(password), /[^A-Za-z0-9]/.test(password)].filter(Boolean).length;
+        }
+
+        function friendlyError(error) {
+            if (error.code === 'EMAIL_EXISTS') return 'This email is already registered. Please log in.';
+            if (error.code === 'VERIFICATION_RATE_LIMIT') return `Too many verification attempts. Please wait ${error.retryAfterSeconds || 60} seconds and try again.`;
+            if (error.code === 'EMAIL_NOT_CONFIGURED' || error.code === 'EMAIL_DELIVERY_FAILED') return 'Unable to send verification email. Please try again later.';
+            return error.message || 'Unable to create your account. Please try again.';
+        }
+
+        passwordInput.addEventListener('input', () => {
+            const score = passwordScore(passwordInput.value);
+            passwordStrength.textContent = score === 5 ? 'Strong password.' : `${score}/5 requirements met: 6+ characters, uppercase, lowercase, number, special character.`;
+            passwordStrength.classList.toggle('strong', score === 5);
+        });
+
+        document.querySelectorAll('.password-toggle').forEach((button) => button.addEventListener('click', () => {
+            const target = document.getElementById(button.dataset.target);
+            const visible = target.type === 'text';
+            target.type = visible ? 'password' : 'text';
+            button.textContent = visible ? 'Show' : 'Hide';
+        }));
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const confirmPassword = confirmInput.value.trim();
+
+            if (!name || !email || !password || !confirmPassword) {
+                showMessage('Please complete all fields.', true);
+                return;
+            }
+
+            if (!window.jobtrackAuth.isValidEmail(email)) {
+                showMessage('Please enter a valid email address.', true);
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Please choose a stronger password.', true);
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match.', true);
+                return;
+            }
+
+            try {
+                if (!pendingVerificationEmail) {
+                    setSubmitting(true, 'Creating account...');
+                    const result = await window.jobtrackApi.post('/api/register', { name, email, password });
+                    pendingVerificationEmail = email;
+                    verificationField.hidden = false;
+                    verificationCode.required = true;
+                    verificationEmail.textContent = email;
+                    verificationState.hidden = false;
+                    showMessage(result.message || 'Enter the verification code sent to your email.');
+                    setSubmitting(false, 'Verify email');
+                    return;
+                }
+
+                if (!verificationCode.value.trim()) {
+                    showMessage('Enter the verification code from your email.', true);
+                    return;
+                }
+
+                setSubmitting(true, 'Verifying email...');
+                await window.jobtrackApi.post('/api/verify-email', { email: pendingVerificationEmail, code: verificationCode.value.trim() });
+                const result = await window.jobtrackApi.post('/api/login', { email: pendingVerificationEmail, password });
+                localStorage.setItem('jobtrackToken', result.token);
+                localStorage.setItem('jobtrackUser', JSON.stringify(result.user));
+                window.location.href = '/dashboard';
+            } catch (error) {
+                showMessage(friendlyError(error), true);
+                setSubmitting(false, pendingVerificationEmail ? 'Verify email' : 'Create account');
+            }
+        });
+
+        resendButton.addEventListener('click', async () => {
+            resendButton.disabled = true;
+            resendButton.textContent = 'Sending...';
+            let retryDelay = 3;
+            try {
+                const result = await window.jobtrackApi.post('/api/resend-verification', { email: pendingVerificationEmail });
+                showMessage(result.message || 'Verification email sent.');
+            } catch (error) {
+                showMessage(friendlyError(error), true);
+                retryDelay = error.retryAfterSeconds || 3;
+            } finally {
+                setTimeout(() => {
+                    resendButton.disabled = false;
+                    resendButton.textContent = 'Resend verification email';
+                }, Math.max(1000, retryDelay * 1000));
+            }
+        });
+    </script>
+</body>
+</html>

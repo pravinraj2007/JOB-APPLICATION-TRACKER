@@ -1,0 +1,12 @@
+EMAIL_USER configured: YES
+EMAIL_PASS configured: YES
+EMAIL_FROM configured: YES
+SMTP_HOST: smtp.gmail.com
+SMTP_PORT: 587
+SMTP_SECURE: false
+MONGODB_URI configured: YES
+MongoDB connected successfully.
+SMTP_VERIFY: SUCCESS
+SMTP connection successful
+Migrated legacy resume document for user: 6aaf7e574caabb71b6584201
+JobTrack API running on http://localhost:5002

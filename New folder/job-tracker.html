@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Job Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">✓</span>
+                <span>JobTrack</span>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html" class="active-link">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html">Interview Prep</a>
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+                <a href="login.html" data-auth-link="login">Login</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-header card">
+            <div>
+                <p class="eyebrow">JOB TRACKER</p>
+                <h1>Track every opportunity.</h1>
+            </div>
+            <button id="addJobButton" class="cta-button">+ Add Job</button>
+        </section>
+
+        <section class="quick-metrics">
+            <div class="stat-card"><span>Saved</span><strong id="savedCount">0</strong></div>
+            <div class="stat-card"><span>Applied</span><strong id="appliedCount">0</strong></div>
+            <div class="stat-card"><span>Interviews</span><strong id="interviewCount">0</strong></div>
+            <div class="stat-card"><span>Offers</span><strong id="offerCount">0</strong></div>
+        </section>
+
+        <section class="card padded">
+            <div class="filter-row">
+                <input id="jobSearch" type="search" placeholder="Search company or job title...">
+                <select id="jobFilter">
+                    <option value="All">All</option>
+                    <option value="Saved">Saved</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Assessment">Assessment</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Withdrawn">Withdrawn</option>
+                </select>
+                <select id="jobSort" aria-label="Sort jobs">
+                    <option value="recent">Newest first</option>
+                    <option value="company">Company A-Z</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="status">Status</option>
+                </select>
+            </div>
+            <div class="view-switch" role="group" aria-label="Job view">
+                <button class="view-switch-button active" type="button" data-view="list">List</button>
+                <button class="view-switch-button" type="button" data-view="kanban">Kanban</button>
+            </div>
+            <div id="jobsTable" class="jobs-grid"></div>
+        </section>
+    </main>
+
+    <div id="jobModal" class="modal hidden">
+        <div class="modal-card">
+            <button type="button" class="close-button" data-close="jobModal">×</button>
+            <h3>Add a job</h3>
+            <form id="jobForm">
+                <label>Company Name<input name="company" required></label>
+                <label>Job Title<input name="role" required></label>
+                <label>Location<input name="location"></label>
+                <label>Job URL<input name="job_link" type="url"></label>
+                <label>Job Type<select name="job_type"><option>Full-time</option><option>Internship</option><option>Contract</option><option>Part-time</option></select></label>
+                <label>Salary<input name="salary"></label>
+                <label>Applied Date<input name="application_date" type="date"></label>
+                <label>Status<select name="status"><option>Saved</option><option selected>Applied</option><option>Assessment</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></label>
+                <label>Notes<textarea rows="3" name="notes"></textarea></label>
+                <button class="cta-button" type="submit">Save job</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: true });
+
+        const modal = document.getElementById('jobModal');
+        const jobsTable = document.getElementById('jobsTable');
+        const filterSelect = document.getElementById('jobFilter');
+        const searchInput = document.getElementById('jobSearch');
+        const sortSelect = document.getElementById('jobSort');
+        let currentView = 'list';
+
+        async function loadJobs() {
+            try {
+                const jobs = await window.jobtrackApi.get('/api/jobs');
+                renderJobs(jobs);
+            } catch (error) {
+                jobsTable.innerHTML = '<div class="empty-state">Unable to load jobs.</div>';
+            }
+        }
+
+        function renderJobs(jobs = []) {
+            const filter = filterSelect.value;
+            const search = searchInput.value.trim().toLowerCase();
+            const filtered = jobs.filter((job) => {
+                const matchesFilter = filter === 'All' || job.status === filter;
+                const text = `${job.company || ''} ${job.role || ''} ${job.location || ''}`.toLowerCase();
+                const matchesSearch = !search || text.includes(search);
+                return matchesFilter && matchesSearch;
+            });
+            filtered.sort((left, right) => {
+                if (sortSelect.value === 'company') return String(left.company || '').localeCompare(String(right.company || ''));
+                if (sortSelect.value === 'deadline') return String(left.deadline || '9999-12-31').localeCompare(String(right.deadline || '9999-12-31'));
+                if (sortSelect.value === 'status') return String(left.status || '').localeCompare(String(right.status || ''));
+                return Number(right.id || 0) - Number(left.id || 0);
+            });
+
+            if (!filtered.length) {
+                jobsTable.innerHTML = '<div class="empty-state">No jobs match the current filter.</div>';
+            } else if (currentView === 'kanban') {
+                const statuses = ['Saved', 'Applied', 'Assessment', 'Interview', 'Offer', 'Rejected', 'Withdrawn'];
+                jobsTable.className = 'kanban-grid';
+                jobsTable.innerHTML = statuses.map((status) => {
+                    const columnJobs = filtered.filter((job) => (job.status || 'Applied') === status);
+                    return `<section class="kanban-column"><div class="kanban-heading"><strong>${status}</strong><span>${columnJobs.length}</span></div><div class="kanban-cards">${columnJobs.length ? columnJobs.map((job) => `<article class="job-card kanban-card"><div class="job-card-head"><strong>${job.company}</strong><span class="status ${String(job.status || 'Applied').toLowerCase().replace(/\s+/g, '-')}" >${job.status || 'Applied'}</span></div><p>${job.role}</p><small>${job.location || 'Remote'} • ${job.deadline || 'No deadline'}</small><div class="job-card-actions"><button class="mini-button" data-action="status" data-id="${job.id}">Update Status</button><button class="mini-button danger" data-action="delete" data-id="${job.id}">Delete</button></div></article>`).join('') : '<p class="kanban-empty">No applications</p>'}</div></section>`;
+                }).join('');
+            } else {
+                jobsTable.className = 'jobs-grid';
+                jobsTable.innerHTML = filtered.map((job) => `
+                    <article class="job-card">
+                        <div class="job-card-head">
+                            <strong>${job.company}</strong>
+                            <span class="status ${String(job.status || 'Applied').toLowerCase().replace(/\s+/g, '-')}">${job.status || 'Applied'}</span>
+                        </div>
+                        <p>${job.role}</p>
+                        <small>${job.location || 'Remote'} • ${job.date_applied || job.application_date || 'Not set'}</small>
+                        <div class="job-card-actions">
+                            <button class="mini-button" data-action="status" data-id="${job.id}">Update Status</button>
+                            <button class="mini-button" data-action="edit" data-id="${job.id}">Edit</button>
+                            <button class="mini-button danger" data-action="delete" data-id="${job.id}">Delete</button>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            document.getElementById('savedCount').textContent = jobs.filter((job) => job.status === 'Saved').length;
+            document.getElementById('appliedCount').textContent = jobs.filter((job) => job.status === 'Applied').length;
+            document.getElementById('interviewCount').textContent = jobs.filter((job) => job.status === 'Interview').length;
+            document.getElementById('offerCount').textContent = jobs.filter((job) => job.status === 'Offer').length;
+
+            document.querySelectorAll('[data-action="delete"]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    if (!window.confirm('Delete this application permanently?')) return;
+                    try {
+                        await window.jobtrackApi.delete(`/api/jobs/${button.dataset.id}`);
+                        await loadJobs();
+                    } catch (error) {
+                        jobsTable.innerHTML = '<div class="empty-state">Delete failed.</div>';
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-action="status"]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const jobId = button.dataset.id;
+                    const job = jobs.find((item) => String(item.id) === String(jobId));
+                    if (!job) return;
+                    const nextStatus = prompt('Set status', job.status || 'Applied');
+                    if (!nextStatus) return;
+                    try {
+                        await window.jobtrackApi.put(`/api/jobs/${jobId}`, { ...job, status: nextStatus });
+                        await loadJobs();
+                    } catch (error) {
+                        alert(error.message);
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-action="edit"]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const jobId = button.dataset.id;
+                    const job = jobs.find((item) => String(item.id) === String(jobId));
+                    if (!job) return;
+                    const payload = {
+                        company: prompt('Company', job.company || ''),
+                        role: prompt('Role', job.role || ''),
+                        location: prompt('Location', job.location || ''),
+                        job_link: prompt('Job URL', job.job_link || ''),
+                        job_type: prompt('Job type', job.job_type || 'Full-time'),
+                        salary: prompt('Salary', job.salary || ''),
+                        application_date: prompt('Application date', job.date_applied || job.application_date || ''),
+                        deadline: prompt('Deadline', job.deadline || ''),
+                        status: prompt('Status', job.status || 'Applied'),
+                        notes: prompt('Notes', job.notes || ''),
+                        contact_person: prompt('Contact person', job.contact_person || ''),
+                        contact_email: prompt('Contact email', job.contact_email || '')
+                    };
+                    if (!payload.company || !payload.role) return;
+                    try {
+                        await window.jobtrackApi.put(`/api/jobs/${jobId}`, payload);
+                        await loadJobs();
+                    } catch (error) {
+                        alert(error.message);
+                    }
+                });
+            });
+        }
+
+        document.getElementById('addJobButton').addEventListener('click', function () {
+            modal.classList.remove('hidden');
+        });
+
+        document.querySelectorAll('[data-close="jobModal"]').forEach((button) => {
+            button.addEventListener('click', function () { modal.classList.add('hidden'); });
+        });
+
+        document.getElementById('jobForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const details = Object.fromEntries(formData.entries());
+            try {
+                await window.jobtrackApi.post('/api/jobs', details);
+                event.target.reset();
+                modal.classList.add('hidden');
+                await loadJobs();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        searchInput.addEventListener('input', () => loadJobs());
+        filterSelect.addEventListener('change', () => loadJobs());
+        sortSelect.addEventListener('change', () => loadJobs());
+        document.querySelectorAll('.view-switch-button').forEach((button) => button.addEventListener('click', () => {
+            currentView = button.dataset.view;
+            document.querySelectorAll('.view-switch-button').forEach((item) => item.classList.toggle('active', item === button));
+            loadJobs();
+        }));
+        loadJobs();
+    </script>
+</body>
+</html>

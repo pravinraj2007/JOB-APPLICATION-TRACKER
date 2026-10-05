@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack | Interview Prep</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-body">
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><span class="logo-icon">✓</span><span>JobTrack</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="job-tracker.html">Job Tracker</a>
+                <a href="resume-ai.html">Resume AI</a>
+                <a href="career-resources.html">Career Resources</a>
+                <a href="interview-prep.html" class="active-link">Interview Prep</a>
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+                <a href="login.html" data-auth-link="login">Login</a>
+            </nav>
+            <button class="menu-button" id="menuButton">☰</button>
+        </div>
+    </header>
+
+    <main class="page-shell interview-page">
+        <section class="page-header card padded">
+            <div><p class="eyebrow">INTERVIEW PREP</p><h1>Practice with a clearer point of view.</h1><p class="page-lede">Choose the conversation ahead and build answers that sound like you.</p></div>
+        </section>
+        <section class="card padded interview-controls">
+            <div class="form-grid">
+                <label>Target role<input id="targetRole" placeholder="e.g. Product Engineer"></label>
+                <label>Experience level<select id="experienceLevel"><option>Entry level</option><option>Mid level</option><option>Senior</option><option>Lead</option></select></label>
+                <label>Interview type<select id="interviewType"><option>Technical</option><option>HR</option><option>Behavioral</option><option>Managerial</option></select></label>
+            </div>
+            <button class="primary-button" id="startPrep" type="button">Start preparation</button>
+        </section>
+        <section id="interviewResults" class="interview-results" hidden></section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.jobtrackAuth.syncNavigation();
+        window.jobtrackAuth.guardProtectedPage({ requireAuth: true });
+        const questionSets = {
+            Technical: [
+                ['Explain a technical decision you made and the tradeoff involved.', 'Frame the context, constraints, decision, tradeoff, and outcome.'],
+                ['How would you debug a performance issue in production?', 'Walk from measurement to isolation, fix, and regression prevention.'],
+                ['How do you design an API that can evolve safely?', 'Cover contracts, validation, versioning, observability, and compatibility.']
+            ],
+            HR: [
+                ['Tell me about yourself.', 'Keep it present-focused: experience, strengths, and why this role is next.'],
+                ['What motivates you at work?', 'Connect a genuine motivator to the work and environment you are targeting.'],
+                ['Why are you interested in this company?', 'Use specific evidence about the product, mission, or team.']
+            ],
+            Behavioral: [
+                ['Tell me about a difficult project.', 'Use STAR: Situation, Task, Action, Result.'],
+                ['Describe a time you received difficult feedback.', 'Focus on what changed in your behavior and the measurable result.'],
+                ['Tell me about a disagreement with a teammate.', 'Show how you listened, aligned on evidence, and moved forward.']
+            ],
+            Managerial: [
+                ['How do you prioritize competing work?', 'Explain impact, urgency, dependencies, and how you communicate tradeoffs.'],
+                ['How do you help a team improve?', 'Use a concrete example and describe the feedback loop.'],
+                ['How do you handle an underperforming project?', 'Cover diagnosis, alignment, ownership, and a recovery plan.']
+            ]
+        };
+        document.getElementById('startPrep').addEventListener('click', () => {
+            const role = document.getElementById('targetRole').value.trim() || 'your target role';
+            const level = document.getElementById('experienceLevel').value;
+            const type = document.getElementById('interviewType').value;
+            const results = document.getElementById('interviewResults');
+            results.hidden = false;
+            results.innerHTML = `<div class="section-heading interview-heading"><div><p class="eyebrow">${type.toUpperCase()} PRACTICE</p><h2>${role} · ${level}</h2></div><span class="tool-muted">${questionSets[type].length} questions</span></div>${questionSets[type].map((item, index) => `<article class="interview-question"><span class="tool-index">QUESTION ${String(index + 1).padStart(2, '0')}</span><h3>${item[0]}</h3><p><strong>Preparation tip:</strong> ${item[1]}</p><textarea rows="5" placeholder="Write your answer here..."></textarea></article>`).join('')}`;
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    </script>
+</body>
+</html>
